@@ -1,0 +1,7 @@
+# Binaries
+bin/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+Makefile
