@@ -1,7 +1,16 @@
-# Binaries
+# Editor Configuration
+.vscode
+
+# Binaries and Libraries
 bin/
+lib/
 
 # CMake
 CMakeFiles/
 CMakeCache.txt
 Makefile
+cmake_install.cmake
+
+# Images
+*.jpg
+*.JPG
