@@ -2,14 +2,6 @@
 
 using namespace image_transform;
 
-cv::Mat ImageTransform::loadImage(const std::string& imagePath) {
-    cv::Mat img = cv::imread(imagePath, cv::IMREAD_GRAYSCALE);
-    std::cout << "Loading image: " << imagePath << std::endl;
-    if(img.empty()) throw std::runtime_error("could not read image");
-
-    return img;
-}
-
 cv::aruco::ArucoDetector ImageTransform::configureDetector() {
     cv::aruco::DetectorParameters detectorParams = cv::aruco::DetectorParameters();
     cv::aruco::Dictionary dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_APRILTAG_36h11);
@@ -106,14 +98,19 @@ ImageTransform::ImageTransform(cv::Mat image) {
 
 ImageTransform::~ImageTransform() {}
 
-void ImageTransform::saveProjectedImage(std::string outputFilePath) {
-    auto image = loadImage(this->imagePath_);
-
+cv::Mat ImageTransform::projectImage(cv::Mat image) {
     float imgW = static_cast<float>(image.cols);
     float imgH = static_cast<float>(image.rows);
 
     cv::Mat projected = cv::Mat::zeros(imgH, imgW, CV_32FC3);
     cv::warpPerspective(image, projected, this->transformMatrix_, image.size());
+    return projected;
+}
+
+void ImageTransform::saveImage(cv::Mat image, std::string outputFilePath) {
+    auto loaded = loadImage(this->imagePath_);
+
+    auto projected = this->projectImage(loaded);
 
     auto success = cv::imwrite(outputFilePath, projected);
     if(success) {

@@ -3,6 +3,7 @@ add_library(
     image_transform
     SHARED
     image_transform.cpp
+    boundary_detection.cpp
 )
 
 target_compile_definitions(

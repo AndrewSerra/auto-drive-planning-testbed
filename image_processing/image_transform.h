@@ -4,6 +4,7 @@
 #include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/opencv.hpp>
+#include "image_processor.h"
 
 
 #define BOTTOM_LEFT_TAG_ID    0
@@ -19,7 +20,7 @@ namespace image_transform {
         BOTTOM_LEFT
     };
 
-    class ImageTransform {
+    class ImageTransform : public ImageProcessor {
 
         private:
         std::string imagePath_;
@@ -28,7 +29,6 @@ namespace image_transform {
         cv::Scalar cornerColor_ = cv::Scalar(0, 255, 0);
         int thickness_ = 8;
 
-        static cv::Mat loadImage(const std::string& imagePath);
         static cv::aruco::ArucoDetector configureDetector();
         static cv::Vec3f toLine(cv::Point2f a, cv::Point2f b);
         static cv::Point2f intersect(cv::Vec3f l1, cv::Vec3f l2);
@@ -39,7 +39,8 @@ namespace image_transform {
         ImageTransform(cv::Mat image);
         ~ImageTransform();
 
-        void saveProjectedImage(std::string outputFilePath);
+        cv::Mat projectImage(cv::Mat image);
+        void saveImage(cv::Mat image, std::string outputFilePath) override;
     };
 
 } // namespace image_transform

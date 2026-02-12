@@ -1,10 +1,11 @@
 #include "image_transform.h"
+#include "boundary_detection.h"
 #include <iostream>
 #include <stdexcept>
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {
-        std::cerr << "Usage: " << argv[0] << " <input_image> <output_image>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <input_image> <output_path>" << std::endl;
         return 1;
     }
 
@@ -13,7 +14,10 @@ int main(int argc, char* argv[]) {
 
     try {
         image_transform::ImageTransform transform(inputPath);
-        transform.saveProjectedImage(outputPath);
+        transform.saveImage({}, outputPath + "projection.jpg");
+        image_transform::BoundaryDetection boundary(outputPath + "projection.jpg");
+        cv::Mat projection = cv::imread(outputPath + "projection.jpg");
+        boundary.saveImage(projection, outputPath + "boundary.jpg");
     } catch (const std::out_of_range& e) {
         std::cerr << "Out of range error: " << e.what() << std::endl;
         std::cerr << "AprilTag markers may not have been detected in the image." << std::endl;
