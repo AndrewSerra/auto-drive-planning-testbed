@@ -10,8 +10,10 @@
 
 #define BOTTOM_LEFT_TAG_ID    0
 #define TOP_RIGHT_TAG_ID      1
+#define TOP_LEFT_TAG_ID       2
+#define BOTTOM_RIGHT_TAG_ID   3
 
-#define DEBUG
+// #define DEBUG
 
 enum AprilTagCornerIndex {
     TOP_LEFT,
@@ -175,7 +177,7 @@ cv::Mat projectImage(cv::Mat image, std::array<cv::Point2f, 4> transformPoints) 
     return projected;
 }
 
-cv::Mat getBoundary(cv::Mat image) {
+std::vector<cv::Point> getBoundary(cv::Mat image) {
     cv::Scalar boundaryColorHigh = cv::Scalar(114, 255, 255);
     cv::Scalar boundaryColorLow = cv::Scalar(40, 180, 190);
 
@@ -192,25 +194,29 @@ cv::Mat getBoundary(cv::Mat image) {
 
     cv::findContours(mask, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
 
-    // Only draw contours above a minimum area to ignore remaining noise
+    // Find the inner contour of the tape (has a parent in the hierarchy)
+    std::vector<cv::Point> innerContour;
+    double maxArea = 0;
     double minArea = 5000.0;
     for(size_t i = 0; i < contours.size(); i++) {
-        if(cv::contourArea(contours[i]) >= minArea) {
-            std::vector<cv::Point> approx;
-            // Epsilon controls smoothing: increase (e.g. 0.04) for more,
-            // decrease (e.g. 0.01) for less. Value is a fraction of perimeter.
-            double epsilon = 0.005 * cv::arcLength(contours[i], true);
-            cv::approxPolyDP(contours[i], approx, epsilon, true);
-            std::vector<std::vector<cv::Point>> smoothed = {approx};
-            cv::drawContours(image, smoothed, 0, cv::Scalar(0, 0, 255), 10);
+        // hierarchy[i][3] >= 0 means this contour has a parent (it's an inner contour)
+        if(hierarchy[i][3] >= 0) {
+            double area = cv::contourArea(contours[i]);
+            if(area >= minArea && area > maxArea) {
+                maxArea = area;
+                innerContour = contours[i];
+            }
         }
     }
 
-    saveImage(image, "out/boundary.jpg");
-    cv::imshow("Contour", image);
-    cv::waitKey(0);
+    // Smooth the inner contour
+    // Epsilon controls smoothing: increase (e.g. 0.04) for more,
+    // decrease (e.g. 0.01) for less. Value is a fraction of perimeter.
+    std::vector<cv::Point> approx;
+    double epsilon = 0.005 * cv::arcLength(innerContour, true);
+    cv::approxPolyDP(innerContour, approx, epsilon, true);
 
-    return mask;
+    return approx;
 }
 
 int main(int argc, char* argv[]) {
@@ -257,7 +263,23 @@ int main(int argc, char* argv[]) {
     };
 
     auto projectedImg = projectImage(image, transformPoints);
+
+    #ifdef DEBUG
     saveImage(projectedImg, getOutputPath("projected.jpg"));
+    #endif
 
     auto boundary = getBoundary(projectedImg);
+
+    // Draw the boundary on the projected image
+    cv::drawContours(projectedImg, boundary, 0, cv::Scalar(0, 0, 255), 10);
+    #ifdef DEBUG
+    saveImage(projectedImg, getOutputPath("boundary.jpg"));
+    #endif
+
+    // To check if an object is inside the tape boundary:
+    // cv::pointPolygonTest(boundary, objectPoint, false)
+    //   > 0 : inside
+    //   = 0 : on the edge
+    //   < 0 : outside
+
 }
