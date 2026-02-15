@@ -10,7 +10,11 @@ CMakeFiles/
 CMakeCache.txt
 Makefile
 cmake_install.cmake
+build/
+compile_commands.json
+.cache/
 
 # Images
+out/
 *.jpg
 *.JPG
