@@ -26,6 +26,12 @@ target_link_libraries(
     ${OpenCV_LIBS}
 )
 
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    target_compile_definitions(testbed PRIVATE 
+        DEBUG
+    )
+endif()
+
 set_target_properties(testbed PROPERTIES
     OUTPUT_NAME "testbed$<$<CONFIG:Debug>:-debug>"
 )
