@@ -1,21 +1,16 @@
 # Editor Configuration
 .vscode
 
-# Binaries and Libraries
-bin/
-lib/
-
-# CMake
-CMakeFiles/
-CMakeCache.txt
-Makefile
-cmake_install.cmake
-build/
-compile_commands.json
-.cache/
+# Python
+__pycache__/
 
 # Images
 out/
 *.jpg
 *.JPG
-__pycache__/
+
+# Environments
+.venv/
+
+# Miscellaneous
+.DS_Store
