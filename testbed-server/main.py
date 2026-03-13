@@ -1,10 +1,6 @@
-import cv2 as cv
-import numpy as np
 import logging
-import json
-from dataclasses import dataclass
-from pathlib import Path
 from argparse import ArgumentParser
+from queue import SimpleQueue
 from camera import run_calibration
 from config import TestbedConfig
 
@@ -18,7 +14,7 @@ if __name__ == "__main__":
 
     argparser = ArgumentParser(
         prog="testbed-server",
-        description="A server for testing planning algorithmns"
+        description="A server for testing planning algorithms"
     )
 
     argparser.add_argument(
@@ -36,5 +32,8 @@ if __name__ == "__main__":
     
     testbed_config = TestbedConfig(file_path=args.config_file)
 
-    run_calibration()
+    camera_to_planner = SimpleQueue()
+    planner_to_notifier = SimpleQueue()
+
+    # run_calibration()
 
