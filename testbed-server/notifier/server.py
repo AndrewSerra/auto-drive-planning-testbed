@@ -12,7 +12,6 @@ from .model import (
 
 _logger = logging.getLogger("testbed")
 
-
 class NotifierServer:
 
     _port: int
