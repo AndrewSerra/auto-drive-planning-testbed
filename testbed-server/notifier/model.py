@@ -1,10 +1,11 @@
-from typing import Literal, Optional, Sequence
+from typing import Literal, Optional, TypeAlias
 from enum import Enum
 from pydantic import BaseModel
 
+ConnType: TypeAlias = Literal["display", "agent"]
+
 class Action(Enum):
-    REGISTER = "REGISTER"
-    SUBSCRIBE = "SUBSCRIBE"
+    INITIALIZE = "INITIALIZE"
     EXECUTE = "EXECUTE"
 
 class Topic(Enum):
@@ -12,24 +13,15 @@ class Topic(Enum):
     RECV_POSITION = "RECV_POSITION"
     SYSTEM_WIDE = "SYSTEM_WIDE"
 
-class CarRegisterMessage(BaseModel):
-    action: Literal["REGISTER"]
-    car_id: str
-
-class TopicSubscribeMessage(BaseModel):
-    action: Literal["SUBSCRIBE"]
-    topics: Sequence[Topic]
+class ServerRegistrationMessage(BaseModel):
+    action: Literal["INITIALIZE"]
+    id: str
+    connection_type: ConnType
 
 class CarCommandMessage(BaseModel):
     action: Literal["EXECUTE"]
     steering: int
     speed: int
-
-class CarRegisterErrorMessage(BaseModel):
-    message: str
-
-class TopicSubscribeErrorMessage(BaseModel):
-    message: str
 
 class ResponseMessage(BaseModel):
     is_success: bool

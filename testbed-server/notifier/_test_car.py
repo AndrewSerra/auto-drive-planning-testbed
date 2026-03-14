@@ -1,60 +1,33 @@
 import asyncio
+from queue import SimpleQueue
 from websockets.sync.client import connect
 from .model import (
     Action,
     Topic,
-    CarRegisterMessage,
-    TopicSubscribeMessage,
+    ServerRegistrationMessage,
     ResponseMessage,
 )
-from typing import Annotated, Union
-from pydantic import Field
 from threading import Thread
 from .server import NotifierServer
 
-Message = Annotated[
-    Union[CarRegisterMessage, TopicSubscribeMessage],
-    Field(discriminator="action")
-]
 
 def init_car(car_id: str):
     with connect("ws://localhost:8765") as ws:
-        regsiter_msg = CarRegisterMessage(
-            action=Action.REGISTER.value,
-            car_id=car_id
+        reg_msg = ServerRegistrationMessage(
+            action=Action.INITIALIZE.value,
+            id=car_id,
+            connection_type="agent"
         )
-
-        subscribe_msg = TopicSubscribeMessage(
-            action=Action.SUBSCRIBE.value,
-            topics=[
-                Topic.SYSTEM_WIDE,
-                Topic.RECV_COMMAND,
-            ]
-        )
-
-        ws.send(regsiter_msg.model_dump_json())
-
+        ws.send(reg_msg.model_dump_json())
         resp = ResponseMessage.model_validate_json(ws.recv())
-
         if not resp.is_success:
-            print(f"car '{car_id}' registration unsuccessful")
-            print(f"{car_id} message: {resp.message}")
+            print(f"car '{car_id}' registration unsuccessful: {resp.message}")
         else:
-            print(f"car '{car_id}' registration sucess")
-
-        ws.send(subscribe_msg.model_dump_json())
-
-        resp = ResponseMessage.model_validate_json(ws.recv())
-
-        if not resp.is_success:
-            print(f"car '{car_id}' subscription unsuccessful")
-            print(f"{car_id} message: {resp.message}")
-        else:
-            print(f"car '{car_id}' subscription success")
+            print(f"car '{car_id}' registration success")
 
 
 def run_server() -> None:
-    asyncio.run(NotifierServer().run_server())
+    asyncio.run(NotifierServer(queue=SimpleQueue()).run_server())
 
 if __name__ == "__main__":
     import time
@@ -83,4 +56,3 @@ if __name__ == "__main__":
 
     for t in threads:
         t.join()
-
