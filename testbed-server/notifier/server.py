@@ -95,3 +95,6 @@ class NotifierServer:
     async def run_server(self):
         async with serve(self._handle_conn, "localhost", self._port) as server:
             await server.serve_forever()
+
+if __name__ == "__main__":
+    NotifierServer().run_server()

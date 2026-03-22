@@ -1,0 +1,8 @@
+# Direct dependencies — compiled to requirements.txt via:
+#   uv pip compile requirements.in -o requirements.txt
+
+numpy>=2.0
+opencv-contrib-python>=4.13
+opencv-python>=4.13
+websockets>=16.0
+pydantic>=2.0
