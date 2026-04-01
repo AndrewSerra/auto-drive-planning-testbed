@@ -4,6 +4,8 @@ from typing import Annotated, Union, Sequence
 from websockets.asyncio.server import serve, ServerConnection
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 from pydantic import Field, TypeAdapter, ValidationError
+from threading import Event
+
 from .model import (
     ServerRegistrationMessage, ResponseMessage,
     ConnType,
@@ -17,14 +19,16 @@ class NotifierServer:
     _port: int
     _active_connections: int
     _incoming_queue: SimpleQueue
+    _stop_event: Event
 
     _subscriptions: dict[Topic, set]
 
-    def __init__(self, queue: SimpleQueue, port: int = 8765):
+    def __init__(self, queue: SimpleQueue, stop_event: Event, port: int = 8765):
         self._port = port
         self._incoming_queue = queue
         self._active_connections = 0
         self._subscriptions: dict[Topic, set] = {topic: set() for topic in Topic}
+        self._stop_event = stop_event
 
     def _subscribe_to(self, id: str, topics: Sequence[Topic]) -> None:
         assert isinstance(topics, Sequence) and \
@@ -69,15 +73,22 @@ class NotifierServer:
                 _logger.error(f"invalid message: {e}")
                 await websocket.send(
                     ResponseMessage(is_success=False, message=f"{e.json()}").model_dump_json())
+            finally:
+                if self._stop_event.is_set():
+                    return
 
         while True:
             try:
+                if self._stop_event.is_set():
+                    break
+
                 await websocket.wait_closed()
 
                 if conn_t == "display":
                     pass
                 elif conn_t == "agent":
                     pass
+
             except ValidationError as e:
                 await websocket.send(ResponseMessage(
                     is_success=False,
@@ -95,6 +106,3 @@ class NotifierServer:
     async def run_server(self):
         async with serve(self._handle_conn, "localhost", self._port) as server:
             await server.serve_forever()
-
-if __name__ == "__main__":
-    NotifierServer().run_server()

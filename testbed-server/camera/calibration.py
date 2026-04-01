@@ -177,29 +177,32 @@ def _calculate_homography_matrix(image: np.ndarray) -> np.ndarray:
 
     return homography_mat
 
-def run_calibration() -> None:
+def run_calibration() -> tuple[np.ndarray, np.ndarray]:
 
-    # image = _capture_frame()
+    image = _capture_frame()
 
-    image_path = "/Users/andrewserra/GithubProjects/auto-planning-software-testbed/IMG_7969.JPG"
-    image = cv.imread(image_path)
+    # image_path = "/Users/andrewserra/GithubProjects/auto-planning-software-testbed/IMG_7969.JPG"
+    # image = cv.imread(image_path)
 
-    if image is None:
-        raise Exception("image not found")
+    # if image is None:
+    #     raise Exception("image not found")
 
     homography_mat = _calculate_homography_matrix(image)
 
     img_h, img_w, _ = image.shape
     projection = cv.warpPerspective(image, homography_mat, (img_w, img_h))
 
-    cv.imshow("project", projection)
+    # cv.imshow("project", projection)
 
     boundary = _detect_execution_boundary(projection)
 
-    projection_with_boundary = projection.copy()
-    if boundary.size > 0:
-        cv.drawContours(projection_with_boundary, [boundary], -1, (0, 255, 0), 3)
-    cv.imshow("project with boundary", projection_with_boundary)
+    # projection_with_boundary = projection.copy()
+    # if boundary.size > 0:
+    #     cv.drawContours(projection_with_boundary, [boundary], -1, (0, 255, 0), 3)
 
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    # cv.imshow("project with boundary", projection_with_boundary)
+
+    # cv.waitKey(0)
+    # cv.destroyAllWindows()
+
+    return homography_mat, boundary

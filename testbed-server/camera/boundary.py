@@ -17,15 +17,19 @@ def _get_workspace_grid(image_shape: tuple, num_rows: int, num_cols: int):
 def _detect_execution_boundary(image: np.ndarray) -> np.ndarray:
     _logger.info("Starting execution area boundary detection.")
 
-    boundary_color_low = np.array([40, 180, 190])
+    boundary_color_low = np.array([30, 170, 180])
     boundary_color_high = np.array([114, 255, 255])
 
-    blur = cv.GaussianBlur(image, (5, 5), sigmaX=0.5, sigmaY=0.5)
+    blur = cv.GaussianBlur(image, (3, 3), sigmaX=0.5, sigmaY=0.5)
     mask = cv.inRange(blur, boundary_color_low, boundary_color_high)
 
-    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (15, 15))
-    mask = cv.morphologyEx(mask, cv.MORPH_CLOSE, kernel)
-    mask = cv.morphologyEx(mask, cv.MORPH_OPEN, kernel)
+    # cv.imshow("boundary mask", mask)
+
+    # kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (15, 15))
+    # mask = cv.morphologyEx(mask, cv.MORPH_CLOSE, kernel)
+    # mask = cv.morphologyEx(mask, cv.MORPH_OPEN, kernel)
+
+    # cv.imshow("boundary mask morph", mask)
 
     contours, hierarchy = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
