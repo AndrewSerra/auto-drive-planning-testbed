@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Optional
 from pydantic import BaseModel
 from threading import Event
+from .boundary import GridSpacing, _get_agent_grid_pos
 
 _logger = logging.getLogger("testbed")
 
@@ -20,16 +21,19 @@ class DetectedChange(BaseModel):
 class AgentDetection:
     pos_x: float
     pos_y: float
-
-    def __init__(self, pos_x: float, pos_y: float) -> None:
-        self.pos_x = pos_x
-        self.pos_y = pos_y
+    grid_row_idx: int
+    grid_col_idx: int
+    
+    def __init__(self, pos_img: tuple[float, float], pos_grid: tuple[int, int]) -> None:
+        self.pos_x, self.pos_y = pos_img
+        self.grid_row_idx, self.grid_col_idx = pos_grid
 
     def change_mag(self, detection: 'AgentDetection') -> float:
         diff_x = self.pos_x - detection.pos_x
         diff_y = self.pos_y - detection.pos_y
         return np.sqrt(diff_x ** 2 + diff_y ** 2)
 
+@dataclass
 class MotionVec:
     magnitude: float
     angle: float
@@ -57,13 +61,6 @@ class PositionTrack:
         self._curr_vec = None
         self._has_significant_change = True
 
-    def update(self, detection: AgentDetection) -> None:
-        prev = self._detections[-1]
-        self._detections.append(detection)
-        change_magnitude = prev.change_mag(detection)
-        self._has_significant_change = change_magnitude >= self._SIG_MAG_CHANGE_THRESH
-        self._curr_vec = MotionVec(prev, detection)
-
     @property
     def vector(self) -> Optional[MotionVec]:
         return self._curr_vec
@@ -77,17 +74,25 @@ class PositionTrack:
         detection = self._detections[-1]
         return detection.pos_x, detection.pos_y
 
+    def update(self, detection: AgentDetection) -> None:
+        prev = self._detections[-1]
+        self._detections.append(detection)
+        change_magnitude = prev.change_mag(detection)
+        self._has_significant_change = change_magnitude >= self._SIG_MAG_CHANGE_THRESH
+        self._curr_vec = MotionVec(prev, detection)
+
 class AgentTracker:
 
     _cam: cv.VideoCapture
     _output_queue: SimpleQueue
 
     _H: np.ndarray
+    _grid_space: GridSpacing
     _stop_event: Event
 
     _motion_vec_lookup: dict[str, PositionTrack]
 
-    def __init__(self, H: np.ndarray, stop_event: Event, output_queue: SimpleQueue) -> None:
+    def __init__(self, H: np.ndarray, grid_space: GridSpacing, stop_event: Event, output_queue: SimpleQueue) -> None:
         assert H.shape == (3,3), f"incorrect shape for H {H.shape}, expected (3,3)"
 
         self._cam = cv.VideoCapture(0)
@@ -97,6 +102,7 @@ class AgentTracker:
 
         self._output_queue = output_queue
         self._H = H
+        self._grid_space = grid_space
         self._stop_event = stop_event
         self._motion_vec_lookup: dict[str, PositionTrack] = {}
 
@@ -141,7 +147,6 @@ class AgentTracker:
 
             corners, ids, _ = detector.detectMarkers(frame)
 
-            # TODO: Remove after debugging
             # if ids is not None:
             #     cv.aruco.drawDetectedMarkers(frame, corners, ids)
 
@@ -153,18 +158,23 @@ class AgentTracker:
                 #     break
                 continue
 
-            # Remove wrapper dimension
+            # Remove wrapper dimension - OpenCV python adds another dimention to the result
             corners_unwrap, ids_unwrap = corners[0], ids[0]
             centers = [self._get_april_tag_center(tag) for tag in corners_unwrap]
 
             for i in range(len(ids_unwrap)):
                 car_id = ids_unwrap[i]
+                # Project the centers to bird's eye view
                 p = self._H @ centers[i]
+
+                pos_img = (p[0] / p[2], p[1] / p[2])
+                pos_grid = _get_agent_grid_pos(self._grid_space, pos_img)
+
                 self._update_motion_tracker(
                     car_id,
                     AgentDetection(
-                        pos_x=p[0] / p[2],
-                        pos_y=p[1] / p[2],
+                        pos_img=pos_img,
+                        pos_grid=pos_grid
                     )
                 )
 

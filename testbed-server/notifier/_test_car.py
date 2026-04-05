@@ -2,22 +2,16 @@ import asyncio
 from queue import SimpleQueue
 from websockets.sync.client import connect
 from .model import (
-    Action,
-    Topic,
-    ServerRegistrationMessage,
+    AgentRegistrationMessage,
     ResponseMessage,
 )
-from threading import Thread
+from threading import Thread, Event
 from .server import NotifierServer
 
 
 def init_car(car_id: str):
     with connect("ws://localhost:8765") as ws:
-        reg_msg = ServerRegistrationMessage(
-            action=Action.INITIALIZE.value,
-            id=car_id,
-            connection_type="agent"
-        )
+        reg_msg = AgentRegistrationMessage(id=car_id)
         ws.send(reg_msg.model_dump_json())
         resp = ResponseMessage.model_validate_json(ws.recv())
         if not resp.is_success:
@@ -27,7 +21,7 @@ def init_car(car_id: str):
 
 
 def run_server() -> None:
-    asyncio.run(NotifierServer(queue=SimpleQueue()).run_server())
+    asyncio.run(NotifierServer(queue=SimpleQueue(), stop_event=Event()).run_server())
 
 if __name__ == "__main__":
     import time

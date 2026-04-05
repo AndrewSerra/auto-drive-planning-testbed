@@ -1,6 +1,6 @@
 import logging
 from queue import SimpleQueue
-from typing import Annotated, Union, Sequence, Literal
+from typing import Annotated, Union, Sequence, Literal, Optional
 from websockets.asyncio.server import serve, ServerConnection
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 from pydantic import Field, TypeAdapter, ValidationError
@@ -8,8 +8,9 @@ from threading import Event
 from dataclasses import dataclass
 
 from .model import (
-    ServerRegistrationMessage, ResponseMessage,
-    ConnType,
+    ServerRegistrationMessage,
+    server_reg_msg_type_adapter,
+    ResponseMessage,
     Topic
 )
 
@@ -19,23 +20,46 @@ NotifierConnSMState = Literal['init', 'run']
 
 class NotifierConnSM:
     _state: NotifierConnSMState
-    _conn_t: ConnType
 
-    def __init__(self, conn_t: ConnType) -> None:
+    _connected_id: Optional[str]
+    _conn_t: Optional[Literal["agent", "display"]]
+
+    def __init__(self) -> None:
         self._state = "init"
-        self._conn_t = conn_t
+        self._connected_id = None
+        self._conn_t = None
 
     @property
     def state(self) -> NotifierConnSMState:
         return self._state
     
-    def initialize(self, )
+    @property
+    def connected_id(self) -> NotifierConnSMState:
+        if self._state == "init":
+            raise Exception("cannot get connected id before initialization")
+        return self._connected_id
 
+    @property
+    def conn_t(self) -> NotifierConnSMState:
+        if self._state == "init":
+            raise Exception("cannot get connection type before initialization")
+        return self._conn_t
+
+    @property
+    def is_initialized(self) -> bool:
+        return self._state != "init"
+    
+    def initialize(self, registration_msg: ServerRegistrationMessage):
+        self._connected_id = registration_msg.id
+        self._conn_t = registration_msg.connection_type
+
+        self._state = "run"
 
 class NotifierServer:
 
     _port: int
     _active_connections: int
+    _active_ids: list[str]
     _incoming_queue: SimpleQueue
     _stop_event: Event
 
@@ -45,6 +69,7 @@ class NotifierServer:
         self._port = port
         self._incoming_queue = queue
         self._active_connections = 0
+        self._active_ids = []
         self._subscriptions: dict[Topic, set] = {topic: set() for topic in Topic}
         self._stop_event = stop_event
 
@@ -63,64 +88,97 @@ class NotifierServer:
                 self._subscriptions[Topic.RECV_POSITION].add(id)
             elif topic == Topic.SYSTEM_WIDE:
                 self._subscriptions[Topic.SYSTEM_WIDE].add(id)
-            
 
     async def _handle_conn(self, websocket: ServerConnection) -> None:
-        id: str = ""
-        conn_t: ConnType = "agent"
-        init_complete = False
         self._active_connections += 1
 
-        while not init_complete:
-            try:
-                message = ServerRegistrationMessage.model_validate_json(await websocket.recv())
-                id, conn_t = message.id, message.connection_type
+        sm = NotifierConnSM()
+        running = True
 
-                # TODO: check if there is ids already in the system
-                if conn_t == "display":
-                    self._subscribe_to(id, [Topic.RECV_POSITION, Topic.SYSTEM_WIDE])
-                    init_complete = True
-                    await websocket.send(
-                        ResponseMessage(is_success=True, message=f"display '{id}' initialized").model_dump_json())
-                elif conn_t == "agent":
-                    self._subscribe_to(id, [Topic.RECV_COMMAND, Topic.SYSTEM_WIDE])
-                    init_complete = True
-                    await websocket.send(
-                        ResponseMessage(is_success=True, message=f"car '{id}' initialized").model_dump_json())
-            except ValidationError as e:
-                _logger.error(f"invalid message: {e}")
-                await websocket.send(
-                    ResponseMessage(is_success=False, message=f"{e.json()}").model_dump_json())
+        try:
+            while(running and not self._stop_event.is_set()):
+                if sm.state == "init":
+                    try:
+                        message = server_reg_msg_type_adapter.validate_json(await websocket.recv())
+                        _logger.info("Received 'init' request")
+                        sm.initialize(message)
 
-            if self._stop_event.is_set():
-                break
+                        if sm.connected_id in self._active_ids:
+                            _logger.info(f"Register id '{sm.connected_id}' already in active ids")
+                            await websocket.send(ResponseMessage(
+                                is_success=False,
+                                message="id already active"
+                            ).model_dump_json())
+                            running = False
+                            await websocket.close()
+                            continue
 
-        while True:
-            try:
-                if self._stop_event.is_set():
-                    break
+                        self._active_ids.append(sm.connected_id)
+                        
+                        if sm.conn_t == "agent":
+                            _logger.info("Subscribing agent to 'RECV_COMMAND' and 'SYSTEM_WIDE'")
+                            self._subscribe_to(
+                                sm.connected_id,
+                                [Topic.RECV_COMMAND, Topic.SYSTEM_WIDE]
+                            )
+                        elif sm.conn_t == "display":
+                            _logger.info("Subscribing display to 'RECV_POSITION' and 'SYSTEM_WIDE'")
+                            self._subscribe_to(
+                                sm.connected_id,
+                                [Topic.RECV_POSITION, Topic.SYSTEM_WIDE]
+                            )
+                        else:
+                            _logger.error("sanity check, should never reach here. invalid connection type 'sm.conn_t")
+                            raise Exception(f"invalid connection type: {sm.conn_t}")
 
-                message = await websocket.recv()
+                        _logger.info(f"Successfully initialized '{sm.conn_t}' id '{sm.connected_id}'")
+                        await websocket.send(ResponseMessage(
+                            is_success=True,
+                            message="registered"
+                        ).model_dump_json())
 
-                if conn_t == "display":
-                    pass
-                elif conn_t == "agent":
-                    pass
+                    except ValidationError as e:
+                        _logger.info(f"Could not validate server registration message. Closing connection.")
+                        await websocket.send(ResponseMessage(
+                            is_success=False,
+                            message="invalid registration message format"
+                        ).model_dump_json())
+                        running = False
+                        await websocket.close()
 
-            except ValidationError as e:
-                await websocket.send(ResponseMessage(
-                    is_success=False,
-                    message=f"{e.json()}",
-                ).model_dump_json())
-            except ConnectionClosedOK:
-                _logger.info(f"connection closed successfully")
-                break
-            except ConnectionClosedError as e:
-                _logger.error(f"connection closed unexpectedly: {e}")
-                break
+                    except Exception as e:
+                        running = False
+                        await websocket.close()
+
+                elif sm.state == "run":
+                    running = False
+        
+        except ConnectionClosedOK:
+            _logger.info(f"connection closed successfully")
+                
+        except ConnectionClosedError as e:
+            _logger.error(f"connection closed unexpectedly: {e}")
 
         self._active_connections -= 1
+
+        if sm.is_initialized:
+            self._active_ids.remove(sm.connected_id)
 
     async def run_server(self):
         async with serve(self._handle_conn, "localhost", self._port) as server:
             await server.serve_forever()
+
+
+if __name__ == "__main__":
+    import signal
+    import asyncio
+
+    q = SimpleQueue()
+    stop_event = Event() # used for graceful shutdown
+    stop_event.clear()
+
+    _signal_handler = lambda signal, frame: stop_event.set()
+    signal.signal(signal.SIGINT, _signal_handler)
+    signal.signal(signal.SIGTERM, _signal_handler)
+
+    asyncio.run(NotifierServer(q, stop_event).run_server())
