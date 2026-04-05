@@ -60,9 +60,9 @@ if __name__ == "__main__":
 
     agent_track_out_q = SimpleQueue()
 
-    H, boundary = run_calibration()
+    H, boundary, grid_spacing = run_calibration(testbed_config.grid_size)
 
-    agent_tracker = AgentTracker(H, stop_event, output_queue=agent_track_out_q)
+    agent_tracker = AgentTracker(H, stop_event, agent_track_out_q)
     # notifier_server = NotifierServer(agent_track_out_q)
 
     agent_track_thread = Thread(target=agent_tracker.start_tracking)

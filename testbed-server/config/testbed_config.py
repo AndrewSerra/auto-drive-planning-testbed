@@ -57,11 +57,16 @@ class TestbedConfig:
         self._grid_num_rows = config["grid"]["num_rows"]
 
     @property
+    def grid_size(self) -> tuple[int, int]:
+        return self.grid_num_rows, self.grid_num_cols
+
+    @property
     def grid_num_cols(self) -> int:
         return self._grid_num_cols
 
     @grid_num_cols.setter
     def grid_num_cols(self, value: int) -> None:
+        assert isinstance(value, int), f"number of grid columns, must be int, received '{type(value)}'"
         self._grid_num_cols = value
 
     @property
@@ -70,4 +75,5 @@ class TestbedConfig:
 
     @grid_num_rows.setter
     def grid_num_rows(self, value: int) -> None:
+        assert isinstance(value, int), f"number of grid rows, must be int, received '{type(value)}'"
         self._grid_num_rows = value

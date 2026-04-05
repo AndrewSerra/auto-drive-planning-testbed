@@ -1,25 +1,31 @@
-from typing import Literal, Optional, TypeAlias
+from typing import Literal, Optional, TypeAlias, TypeVar, Generic
 from enum import Enum
 from pydantic import BaseModel
 
 ConnType: TypeAlias = Literal["display", "agent"]
 
-class Action(Enum):
-    INITIALIZE = "INITIALIZE"
-    EXECUTE = "EXECUTE"
+# class Action(Enum):
+#     INITIALIZE = "INITIALIZE"
+#     EXECUTE = "EXECUTE"
 
 class Topic(Enum):
     RECV_COMMAND = "RECV_COMMAND"
     RECV_POSITION = "RECV_POSITION"
     SYSTEM_WIDE = "SYSTEM_WIDE"
 
-class ServerRegistrationMessage(BaseModel):
-    action: Literal["INITIALIZE"]
+
+Action = Literal["INITIALIZE", "EXECUTE"]
+
+ActionT = TypeVar('ActionT')
+
+class RegisterationMessage(BaseModel, Generic[ActionT]):
+    action: ActionT
+
+class ServerRegistrationMessage(RegisterationMessage[Literal["INITIALIZE"]]):
     id: str
     connection_type: ConnType
 
-class CarCommandMessage(BaseModel):
-    action: Literal["EXECUTE"]
+class CarCommandMessage(RegisterationMessage[Literal["EXECUTE"]]):
     steering: int
     speed: int
 

@@ -4,7 +4,7 @@ import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import IntEnum
-from .boundary import _detect_execution_boundary
+from .boundary import _detect_execution_boundary, Boundary, GridSpacing
 from .utils import _capture_frame
 
 _logger = logging.getLogger("testbed")
@@ -177,8 +177,10 @@ def _calculate_homography_matrix(image: np.ndarray) -> np.ndarray:
 
     return homography_mat
 
-def run_calibration() -> tuple[np.ndarray, np.ndarray]:
-
+def run_calibration(grid_size: tuple[int, int]) -> tuple[np.ndarray, Boundary, GridSpacing]:
+    '''
+    grid size is a integer pair of format <num_rows, num_cols>
+    '''
     image = _capture_frame()
 
     # image_path = "/Users/andrewserra/GithubProjects/auto-planning-software-testbed/IMG_7969.JPG"
@@ -194,7 +196,7 @@ def run_calibration() -> tuple[np.ndarray, np.ndarray]:
 
     # cv.imshow("project", projection)
 
-    boundary = _detect_execution_boundary(projection)
+    boundary, grid = _detect_execution_boundary(projection, grid_size)
 
     # projection_with_boundary = projection.copy()
     # if boundary.size > 0:
@@ -205,4 +207,4 @@ def run_calibration() -> tuple[np.ndarray, np.ndarray]:
     # cv.waitKey(0)
     # cv.destroyAllWindows()
 
-    return homography_mat, boundary
+    return homography_mat, boundary, grid

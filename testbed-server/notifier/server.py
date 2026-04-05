@@ -1,10 +1,11 @@
 import logging
 from queue import SimpleQueue
-from typing import Annotated, Union, Sequence
+from typing import Annotated, Union, Sequence, Literal
 from websockets.asyncio.server import serve, ServerConnection
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 from pydantic import Field, TypeAdapter, ValidationError
 from threading import Event
+from dataclasses import dataclass
 
 from .model import (
     ServerRegistrationMessage, ResponseMessage,
@@ -13,6 +14,23 @@ from .model import (
 )
 
 _logger = logging.getLogger("testbed")
+
+NotifierConnSMState = Literal['init', 'run']
+
+class NotifierConnSM:
+    _state: NotifierConnSMState
+    _conn_t: ConnType
+
+    def __init__(self, conn_t: ConnType) -> None:
+        self._state = "init"
+        self._conn_t = conn_t
+
+    @property
+    def state(self) -> NotifierConnSMState:
+        return self._state
+    
+    def initialize(self, )
+
 
 class NotifierServer:
 
@@ -73,16 +91,16 @@ class NotifierServer:
                 _logger.error(f"invalid message: {e}")
                 await websocket.send(
                     ResponseMessage(is_success=False, message=f"{e.json()}").model_dump_json())
-            finally:
-                if self._stop_event.is_set():
-                    return
+
+            if self._stop_event.is_set():
+                break
 
         while True:
             try:
                 if self._stop_event.is_set():
                     break
 
-                await websocket.wait_closed()
+                message = await websocket.recv()
 
                 if conn_t == "display":
                     pass
@@ -95,7 +113,7 @@ class NotifierServer:
                     message=f"{e.json()}",
                 ).model_dump_json())
             except ConnectionClosedOK:
-                _logger.error(f"connection closed successfully")
+                _logger.info(f"connection closed successfully")
                 break
             except ConnectionClosedError as e:
                 _logger.error(f"connection closed unexpectedly: {e}")

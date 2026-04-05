@@ -80,14 +80,14 @@ class PositionTrack:
 class AgentTracker:
 
     _cam: cv.VideoCapture
-    _output_queue: SimpleQueue | None
+    _output_queue: SimpleQueue
 
     _H: np.ndarray
     _stop_event: Event
 
     _motion_vec_lookup: dict[str, PositionTrack]
 
-    def __init__(self, H: np.ndarray, stop_event: Event, output_queue: SimpleQueue | None = None) -> None:
+    def __init__(self, H: np.ndarray, stop_event: Event, output_queue: SimpleQueue) -> None:
         assert H.shape == (3,3), f"incorrect shape for H {H.shape}, expected (3,3)"
 
         self._cam = cv.VideoCapture(0)
@@ -193,8 +193,11 @@ class AgentTracker:
 
 
 if __name__ == "__main__":
-    AgentTracker(np.array([
+    H = np.array([
         [1.0, 1.0, 1.0],
         [1.0, 1.0, 1.0],
-        [1.0, 1.0, 1.0]
-    ])).start_tracking()
+        [1.0, 1.0, 1.0],
+    ])
+    event = Event()
+    q = SimpleQueue()
+    AgentTracker(H, event, q).start_tracking()
