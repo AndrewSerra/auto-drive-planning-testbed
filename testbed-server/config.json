@@ -1,4 +1,8 @@
 {
+    "field": {
+        "depth": 0,
+        "length": 0
+    },
     "grid": {
         "num_cols": 50,
         "num_rows": 50

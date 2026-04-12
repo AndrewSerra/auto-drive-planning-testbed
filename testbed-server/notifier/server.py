@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from queue import SimpleQueue
 from typing import Annotated, Union, Sequence, Literal, Optional
@@ -94,7 +95,7 @@ class NotifierServer:
 
         sm = NotifierConnSM()
         running = True
-
+        _logger.info(f"new connection received: {websocket.remote_address}")
         try:
             while(running and not self._stop_event.is_set()):
                 if sm.state == "init":
@@ -151,7 +152,8 @@ class NotifierServer:
                         await websocket.close()
 
                 elif sm.state == "run":
-                    running = False
+                    message = await websocket.recv()
+                    _logger.info(f"received message from '{sm.connected_id}': {message}")
         
         except ConnectionClosedOK:
             _logger.info(f"connection closed successfully")
@@ -165,13 +167,20 @@ class NotifierServer:
             self._active_ids.remove(sm.connected_id)
 
     async def run_server(self):
-        async with serve(self._handle_conn, "localhost", self._port) as server:
-            await server.serve_forever()
+        async with serve(self._handle_conn, "0.0.0.0", self._port):
+            while not self._stop_event.is_set():
+                await asyncio.sleep(0.1)
 
 
 if __name__ == "__main__":
     import signal
     import asyncio
+
+    logger = logging.getLogger("testbed")
+    logger.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+    logger.addHandler(ch)
 
     q = SimpleQueue()
     stop_event = Event() # used for graceful shutdown
