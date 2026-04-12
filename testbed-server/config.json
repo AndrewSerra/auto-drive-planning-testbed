@@ -1,7 +1,13 @@
 {
-    "field": {
-        "depth": 0,
-        "length": 0
+    "dimensions": {
+        "field": {
+            "depth": 76,
+            "length": 106
+        },
+        "image": {
+            "height": 600,
+            "width": 970
+        }
     },
     "grid": {
         "num_cols": 50,

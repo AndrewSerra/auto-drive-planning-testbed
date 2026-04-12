@@ -15,7 +15,6 @@ class DetectedChange(BaseModel):
     car_id: str
     pos_x: float
     pos_y: float
-    is_inbounds: bool
 
 @dataclass
 class AgentDetection:
@@ -188,7 +187,6 @@ class AgentTracker:
                             car_id=str(car_id),
                             pos_x=x,
                             pos_y=y,
-                            is_inbounds=True
                         )
                     )
                 # vec = self._motion_vec_lookup[ids_unwrap[i]].vector
