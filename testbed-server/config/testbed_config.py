@@ -1,8 +1,17 @@
 import logging
 import json
 from pathlib import Path
+from pydantic import BaseModel, TypeAdapter, ValidationError
+from typing import TypeAlias
 
 _logger = logging.getLogger("testbed")
+
+class AgentConfig(BaseModel):
+    aid: str
+    sink: tuple[int, int]
+
+GridPosition: TypeAlias = tuple[int, int]
+grid_pos_type_adapter = TypeAdapter(GridPosition)
 
 class TestbedConfig:
     _instance = None
@@ -14,6 +23,10 @@ class TestbedConfig:
     _field_depth: float = 0.0   # physical height of field (maps to image height)
     _image_width: int = 0       # pixel width of transformed image
     _image_height: int = 0      # pixel height of transformed image
+
+    _agents: list[AgentConfig] = []
+
+    _static_obstacles: list[GridPosition] = []
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
@@ -57,6 +70,8 @@ class TestbedConfig:
                 "field": {"length": self._field_length, "depth": self._field_depth},
                 "image": {"width": self._image_width, "height": self._image_height},
             },
+            "static_obstacles": [],
+            "agents": [],
         }
 
         config.update(loaded_config)
@@ -68,6 +83,45 @@ class TestbedConfig:
         self._field_depth = config["dimensions"]["field"]["depth"]
         self._image_width = config["dimensions"]["image"]["width"]
         self._image_height = config["dimensions"]["image"]["height"]
+
+        static_obstacles = config["static_obstacles"]
+        if not static_obstacles:
+            _logger.info("No static obstacles found in config")
+
+        raw_agents = config["agents"]
+        if not raw_agents:
+            _logger.warning("No agents found in config")
+            raise ValueError("No agents configured — nothing to track or simulate")
+
+        seen_aids: set[str] = set()
+        parsed_agents: list[AgentConfig] = []
+        for entry in raw_agents:
+            agent = AgentConfig.model_validate(entry)
+            if agent.aid in seen_aids:
+                _logger.warning(f"Duplicate agent id '{agent.aid}' in config")
+            seen_aids.add(agent.aid)
+            row, col = agent.sink
+            if not (0 <= row < self._grid_num_rows and 0 <= col < self._grid_num_cols):
+                raise ValueError(
+                    f"Agent '{agent.aid}' sink {agent.sink} out of grid bounds "
+                    f"({self._grid_num_rows}x{self._grid_num_cols})"
+                )
+            parsed_agents.append(agent)
+
+        self._agents = parsed_agents
+        self._static_obstacles = [
+            grid_pos_type_adapter.validate_python(entry) for entry in static_obstacles
+        ]
+
+    # --- agents ---
+
+    @property
+    def agents(self) -> list[AgentConfig]:
+        return self._agents
+
+    @property
+    def static_obstacles(self) -> list[GridPosition]:
+        return self._static_obstacles
 
     # --- grid ---
 

@@ -22,8 +22,6 @@ WebSocketsClient webSocket;
 Servo steeringServo;
 Servo esc;
 
-int servoPosition = 0;
-
 enum CarState {
   WIFI_CONNECTING,
   WEBSOCKET_CONNECTING,
@@ -78,12 +76,18 @@ void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
       webSocket.sendTXT("{\"id\":\"" CAR_ID "\",\"connection_type\":\"agent\"}");
       break;
     case WStype_TEXT:
-      Serial.printf("[WS] Response: %s\n", payload);
-      if (strstr((char*)payload, "\"is_success\":true") != NULL) {
-        transitionTo(OPERATING);
-      } else {
-        Serial.println("[WS] Registration rejected.");
-        transitionTo(ERROR);
+      Serial.printf("[WS] Message: %s\n", payload);
+      if (strstr((char*)payload, "\"is_success\"") != NULL) {
+        if (strstr((char*)payload, "\"is_success\":true") != NULL) {
+          transitionTo(OPERATING);
+        } else {
+          Serial.println("[WS] Registration rejected.");
+          transitionTo(ERROR);
+        }
+      } else if (strstr((char*)payload, "\"forward\"") != NULL) {
+        if (currentState == OPERATING) {
+          handleCommand((char*)payload);
+        }
       }
       break;
     case WStype_ERROR:
@@ -101,23 +105,33 @@ void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
   }
 }
 
-void steerCenter() {
-  steeringServo.write(90);
-  delay(500);
+void steer(float steering) {
+  // Map [-1.0, 1.0] → [0, 180] degrees; 0.0 = center (90°)
+  int angle = constrain((int)(90.0f + steering * 90.0f), 0, 180);
+  steeringServo.write(angle);
 }
 
-void steerLeft() {
-  for (servoPosition = 90; servoPosition >= 0; servoPosition -= 1) {
-    steeringServo.write(servoPosition);
-    delay(15);
-  }
-}
+void handleCommand(const char* payload) {
+  if (strstr(payload, CAR_ID) == NULL) return;
 
-void steerRight() {
-  for (servoPosition = 90; servoPosition <= 180; servoPosition += 1) {
-    steeringServo.write(servoPosition);
-    delay(15);
+  bool forward = strstr(payload, "\"forward\":true") != NULL;
+
+  float steering = 0.0f;
+  const char* ptr = strstr(payload, "\"steering\":");
+  if (ptr != NULL) {
+    sscanf(ptr + 11, "%f", &steering);
   }
+
+  steer(steering);
+
+  if (forward) {
+    driveForward();
+  } else {
+    driveStop();
+    steeringServo.write(90);  // recenter on stop
+  }
+
+  Serial.printf("[CMD] forward=%s steering=%.2f\n", forward ? "true" : "false", steering);
 }
 
 void driveForward() {

@@ -15,6 +15,9 @@ class DetectedChange(BaseModel):
     car_id: str
     pos_x: float
     pos_y: float
+    grid_row: int
+    grid_col: int
+    angle: float  # degrees from East (+x), counter-clockwise positive, range [0, 360)
 
 @dataclass
 class AgentDetection:
@@ -116,6 +119,22 @@ class AgentTracker:
 
         return np.array([x, y, 1])
     
+    def _transform_corners_to_bev(self, tag: np.ndarray) -> list[tuple[float, float]]:
+        result = []
+        for pt in tag:
+            p = self._H @ np.array([pt[0], pt[1], 1.0])
+            result.append((float(p[0] / p[2]), float(p[1] / p[2])))
+        return result
+
+    def _get_tag_angle_bev(self, corners_bev: list[tuple[float, float]]) -> float:
+        # Forward direction: vector from bottom-right → top-right (right edge of tag).
+        # OpenCV ArUco order: [top-left, top-right, bottom-right, bottom-left].
+        tr = corners_bev[1]
+        br = corners_bev[2]
+        dx = tr[0] - br[0]
+        dy = -(tr[1] - br[1])  # flip y: image y-down → math y-up
+        return float(np.degrees(np.arctan2(dy, dx)) % 360)
+
     def _draw_motion_vec(self, frame: np.ndarray, detection: AgentDetection, vec: MotionVec) -> None:
         start = (int(detection.pos_x), int(detection.pos_y))
         angle_rad = np.radians(vec.angle)
@@ -168,6 +187,8 @@ class AgentTracker:
 
                 pos_img = (p[0] / p[2], p[1] / p[2])
                 pos_grid = _get_agent_grid_pos(self._grid_space, pos_img)
+                corners_bev = self._transform_corners_to_bev(corners_unwrap[i])
+                tag_angle = self._get_tag_angle_bev(corners_bev)
 
                 self._update_motion_tracker(
                     car_id,
@@ -187,6 +208,9 @@ class AgentTracker:
                             car_id=str(car_id),
                             pos_x=x,
                             pos_y=y,
+                            grid_row=pos_grid[0],
+                            grid_col=pos_grid[1],
+                            angle=tag_angle,
                         )
                     )
                 # vec = self._motion_vec_lookup[ids_unwrap[i]].vector
@@ -200,12 +224,12 @@ class AgentTracker:
             #     break
 
 
-if __name__ == "__main__":
-    H = np.array([
-        [1.0, 1.0, 1.0],
-        [1.0, 1.0, 1.0],
-        [1.0, 1.0, 1.0],
-    ])
-    event = Event()
-    q = SimpleQueue()
-    AgentTracker(H, event, q).start_tracking()
+# if __name__ == "__main__":
+#     H = np.array([
+#         [1.0, 1.0, 1.0],
+#         [1.0, 1.0, 1.0],
+#         [1.0, 1.0, 1.0],
+#     ])
+#     event = Event()
+#     q = SimpleQueue()
+    # AgentTracker(H, event, q).start_tracking()

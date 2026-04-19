@@ -22,9 +22,10 @@ ServerRegistrationMessage = Annotated[
 server_reg_msg_type_adapter = TypeAdapter(ServerRegistrationMessage)
 
 
-# class CarCommandMessage(RegisterationMessage[Literal["EXECUTE"]]):
-#     steering: int
-#     speed: int
+class CarCommandMessage(BaseModel):
+    car_id: str
+    forward: bool
+    steering: float  # [-1.0, 1.0] — negative = left, 0 = straight, positive = right
 
 class ResponseMessage(BaseModel):
     is_success: bool

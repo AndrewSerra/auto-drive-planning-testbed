@@ -12,5 +12,20 @@
     "grid": {
         "num_cols": 50,
         "num_rows": 50
-    }
+    },
+    "static_obstacles": [],
+    "agents": [
+        {
+            "aid": "car_0",
+            "sink": [10, 10]
+        },
+        {
+            "aid": "car_1",
+            "sink": [40, 45]
+        },
+        {
+            "aid": "car_2",
+            "sink": [35, 25]
+        }
+    ]
 }
