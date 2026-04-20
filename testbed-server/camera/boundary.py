@@ -28,7 +28,7 @@ def _detect_execution_boundary(image: np.ndarray, grid_size: tuple[int, int]) ->
     '''
     _logger.info("Starting execution area boundary detection.")
 
-    grid: GridSpacing = _get_workspace_grid(image.shape, grid_size[0], grid_size[1])
+    grid: GridSpacing = _get_workspace_grid(image.shape[:2], grid_size[0], grid_size[1])
 
     boundary_color_low = np.array([30, 170, 180])
     boundary_color_high = np.array([114, 255, 255])

@@ -16,7 +16,7 @@ from notifier.model import AgentRegistrationMessage, CarCommandMessage, Response
 
 _logger = logging.getLogger("car-sim")
 
-CAR_ID = "car_1"
+CAR_ID = "1"
 SERVER_URL = "ws://localhost:8765"
 
 

@@ -2,6 +2,7 @@ import sys
 import asyncio
 import logging
 import signal
+import time
 from argparse import ArgumentParser
 from queue import SimpleQueue
 from threading import Thread, Event
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     notifier_q: SimpleQueue = SimpleQueue()
     field_state = FieldState()
 
-    H, boundary, grid_spacing = run_calibration(testbed_config.grid_size)
+    H, grid_spacing = run_calibration(testbed_config.grid_size)
 
     agent_tracker = AgentTracker(H, grid_spacing, stop_event, detection_q)
     controller = Controller(
@@ -75,16 +76,19 @@ if __name__ == "__main__":
     is_resp_invalid = True
     pre_start_res = ""
 
-    while is_resp_invalid:
-        res = input("should the program start 'y' for being 'q' for exit. y/q?").strip()
+    while is_resp_invalid and not stop_event.is_set():
+        res = input("should the program start 'y' for being 'q' for exit. y/q? ").strip()
         if res not in ['y', 'q']:
-            print(f"invalid response '{res}', only 'y' to begin,  'q' to exit")
+            print(f"invalid response '{res}', only 'y' to begin, 'q' to exit")
         elif res == 'q':
             print("Quitting program...")
+            stop_event.set()
+            time.sleep(2)
             sys.exit()
         else:
             for count in range(5, 0, -1):
                 print(f"Starting in {count}")
+                time.sleep(1)
             is_resp_invalid = False
 
     for t in threads:

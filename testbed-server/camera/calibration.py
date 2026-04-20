@@ -4,7 +4,7 @@ import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import IntEnum
-from .boundary import _detect_execution_boundary, Boundary, GridSpacing
+from .boundary import GridSpacing
 from .utils import _capture_frame
 
 _logger = logging.getLogger("testbed")
@@ -177,7 +177,14 @@ def _calculate_homography_matrix(image: np.ndarray) -> np.ndarray:
 
     return homography_mat
 
-def run_calibration(grid_size: tuple[int, int]) -> tuple[np.ndarray, Boundary, GridSpacing]:
+def _compute_grid(image_shape: tuple[int, int], grid_size: tuple[int, int]) -> GridSpacing:
+    img_h, img_w = image_shape
+    num_rows, num_cols = grid_size
+    horizontal_space = np.linspace(0, img_w, num_cols + 1).astype(int)
+    vertical_space   = np.linspace(0, img_h, num_rows + 1).astype(int)
+    return horizontal_space, vertical_space
+
+def run_calibration(grid_size: tuple[int, int]) -> tuple[np.ndarray, GridSpacing]:
     '''
     grid size is a integer pair of format <num_rows, num_cols>
     '''
@@ -196,15 +203,6 @@ def run_calibration(grid_size: tuple[int, int]) -> tuple[np.ndarray, Boundary, G
 
     # cv.imshow("project", projection)
 
-    boundary, grid = _detect_execution_boundary(projection, grid_size)
+    grid = _compute_grid(projection.shape[:2], grid_size)
 
-    # projection_with_boundary = projection.copy()
-    # if boundary.size > 0:
-    #     cv.drawContours(projection_with_boundary, [boundary], -1, (0, 255, 0), 3)
-
-    # cv.imshow("project with boundary", projection_with_boundary)
-
-    # cv.waitKey(0)
-    # cv.destroyAllWindows()
-
-    return homography_mat, boundary, grid
+    return homography_mat, grid

@@ -16,15 +16,15 @@
     "static_obstacles": [],
     "agents": [
         {
-            "aid": "car_0",
+            "aid": "0",
             "sink": [10, 10]
         },
         {
-            "aid": "car_1",
+            "aid": "1",
             "sink": [40, 45]
         },
         {
-            "aid": "car_2",
+            "aid": "2",
             "sink": [35, 25]
         }
     ]

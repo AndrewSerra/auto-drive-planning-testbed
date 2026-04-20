@@ -9,7 +9,7 @@
 
 #define WS_HOST  "192.168.1.160"
 #define WS_PORT  8765
-#define CAR_ID   "car_1"
+#define CAR_ID   "1"
 
 #define STEERING_PIN     18
 #define ESC_PIN          19
