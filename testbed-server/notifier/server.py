@@ -14,6 +14,7 @@ from .model import (
     CarCommandMessage,
     server_reg_msg_type_adapter,
     ResponseMessage,
+    GridInfoMessage,
     Topic,
 )
 
@@ -31,8 +32,10 @@ class NotifierServer:
     _subscriptions: dict[Topic, set]
     _websockets: dict[str, ServerConnection]
 
-    def __init__(self, queue: SimpleQueue, stop_event: Event, port: int = 8765):
+    def __init__(self, queue: SimpleQueue, stop_event: Event, num_rows: int = 0, num_cols: int = 0, port: int = 8765):
         self._port = port
+        self._num_rows = num_rows
+        self._num_cols = num_cols
         self._incoming_queue = queue
         self._active_connections = 0
         self._active_ids = []
@@ -132,6 +135,12 @@ class NotifierServer:
                             is_success=True,
                             message="registered"
                         ).model_dump_json())
+
+                        if conn_t == "display" and self._num_rows > 0 and self._num_cols > 0:
+                            await websocket.send(GridInfoMessage(
+                                num_rows=self._num_rows,
+                                num_cols=self._num_cols,
+                            ).model_dump_json())
 
                     except ValidationError:
                         _logger.info("Could not validate server registration message. Closing connection.")

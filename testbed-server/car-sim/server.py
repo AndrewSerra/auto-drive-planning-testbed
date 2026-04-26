@@ -42,6 +42,10 @@ class _SimCar:
     def at_goal(self) -> bool:
         return self.row == self._sink_row and self.col == self._sink_col
 
+    def reset(self, num_rows: int, num_cols: int) -> None:
+        self.row = random.randint(0, num_rows - 1)
+        self.col = random.randint(0, num_cols - 1)
+
     def step(self) -> tuple[int, int, float] | None:
         """Move one cell toward sink. Returns (new_row, new_col, angle) or None if at goal."""
         dr = self._sink_row - self.row
@@ -62,13 +66,17 @@ class _SimCar:
         return self.row, self.col, angle
 
 
-def _sim_loop(cars: list[_SimCar], detection_q: SimpleQueue, stop_event: Event) -> None:
+def _to_world(val: int, total: int) -> float:
+    return (val / (total - 1)) * 100.0 - 50.0
+
+
+def _sim_loop(cars: list[_SimCar], detection_q: SimpleQueue, stop_event: Event, num_rows: int, num_cols: int) -> None:
     # Report initial positions to bootstrap planning
     for car in cars:
         detection_q.put(DetectedChange(
             car_id=car.aid,
-            pos_x=float(car.col),
-            pos_y=float(car.row),
+            pos_x=_to_world(car.col, num_cols),
+            pos_y=_to_world(car.row, num_rows),
             grid_row=car.row,
             grid_col=car.col,
             angle=0.0,
@@ -79,12 +87,13 @@ def _sim_loop(cars: list[_SimCar], detection_q: SimpleQueue, stop_event: Event) 
         for car in cars:
             result = car.step()
             if result is None:
+                car.reset(num_rows, num_cols)
                 continue
             new_row, new_col, angle = result
             detection_q.put(DetectedChange(
                 car_id=car.aid,
-                pos_x=float(new_col),
-                pos_y=float(new_row),
+                pos_x=_to_world(new_col, num_cols),
+                pos_y=_to_world(new_row, num_rows),
                 grid_row=new_row,
                 grid_col=new_col,
                 angle=angle,
@@ -137,12 +146,12 @@ def main() -> None:
         stop_event=stop_event,
         cell_travel_time_s=TICK_S,
     )
-    notifier_server = NotifierServer(queue=notifier_q, stop_event=stop_event)
+    notifier_server = NotifierServer(queue=notifier_q, stop_event=stop_event, num_rows=num_rows, num_cols=num_cols)
 
     threads = [
         Thread(target=lambda: asyncio.run(notifier_server.run_server())),
         Thread(target=controller.run),
-        Thread(target=_sim_loop, args=(sim_cars, detection_q, stop_event)),
+        Thread(target=_sim_loop, args=(sim_cars, detection_q, stop_event, num_rows, num_cols)),
     ]
     for t in threads:
         t.start()

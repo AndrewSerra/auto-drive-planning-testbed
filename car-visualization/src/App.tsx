@@ -1,10 +1,8 @@
 import { useEffect, useReducer, useRef, useState, createContext, useContext } from 'react';
 import { positionReducer, type StateObject } from './reducers/positions';
 import { WebsocketService } from './services/websocket';
-import { DemoService } from './services/demo';
 
 const WS_URL = (import.meta as { env: Record<string, string> }).env.VITE_WS_URL ?? 'ws://localhost:8765';
-const DEMO_MODE = (import.meta as { env: Record<string, string> }).env.VITE_DEMO === 'true';
 
 const COLOR_PALETTE = [
   '#e6194b', '#3cb44b', '#4363d8', '#f58231',
@@ -89,7 +87,6 @@ function Sidebar() {
               borderRadius: '50%',
               backgroundColor: colorMap.get(id) ?? '#888',
               flexShrink: 0,
-              opacity: state.positions[id].inbounds ? 1 : 0.35,
             }} />
             <span style={{
               fontFamily: 'monospace',
@@ -97,9 +94,12 @@ function Sidebar() {
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
-              opacity: state.positions[id].inbounds ? 1 : 0.35,
+              flex: 1,
             }}>
               {id}
+            </span>
+            <span style={{ fontFamily: 'monospace', fontSize: '11px', color: '#9e9e9e', flexShrink: 0 }}>
+              {Math.round(state.positions[id].angle)}°
             </span>
           </div>
         ))}
@@ -131,34 +131,49 @@ function BirdsEyeView() {
         viewBox={`${WORLD_MIN_X} ${WORLD_MIN_Y} ${viewWidth} ${viewHeight}`}
         preserveAspectRatio="xMidYMid meet"
       >
-        {/* Grid crosshairs */}
-        <line x1="0" y1={WORLD_MIN_Y} x2="0" y2={WORLD_MAX_Y} stroke="#333" strokeWidth="0.5" />
-        <line x1={WORLD_MIN_X} y1="0" x2={WORLD_MAX_X} y2="0" stroke="#333" strokeWidth="0.5" />
+        {/* Grid lines */}
+        {state.grid && (() => {
+          const { num_rows, num_cols } = state.grid;
+          const xStep = (WORLD_MAX_X - WORLD_MIN_X) / num_cols;
+          const yStep = (WORLD_MAX_Y - WORLD_MIN_Y) / num_rows;
+          const lines = [];
+          for (let c = 0; c <= num_cols; c++) {
+            const x = WORLD_MIN_X + c * xStep;
+            lines.push(<line key={`c${c}`} x1={x} y1={WORLD_MIN_Y} x2={x} y2={WORLD_MAX_Y} stroke="#222" strokeWidth="0.3" />);
+          }
+          for (let r = 0; r <= num_rows; r++) {
+            const y = WORLD_MIN_Y + r * yStep;
+            lines.push(<line key={`r${r}`} x1={WORLD_MIN_X} y1={y} x2={WORLD_MAX_X} y2={y} stroke="#222" strokeWidth="0.3" />);
+          }
+          return lines;
+        })()}
 
-        {/* Car circles (Y-flipped) */}
+        {/* Car circles + heading arrows (Y-flipped) */}
         <g transform={`scale(1,-1)`}>
-          {Object.entries(positions).map(([id, { posX, posY, inbounds }]) => (
-            <circle
-              key={id}
-              cx={posX}
-              cy={posY}
-              r={1.5}
-              fill={colorMap.get(id) ?? '#888'}
-              opacity={inbounds ? 1 : 0.35}
-            />
-          ))}
+          {Object.entries(positions).map(([id, { pos_x, pos_y, angle }]) => {
+            const rad = angle * Math.PI / 180;
+            const arrowLen = 3;
+            const ax = pos_x + Math.cos(rad) * arrowLen;
+            const ay = pos_y + Math.sin(rad) * arrowLen;
+            const color = colorMap.get(id) ?? '#888';
+            return (
+              <g key={id}>
+                <line x1={pos_x} y1={pos_y} x2={ax} y2={ay} stroke={color} strokeWidth="0.8" strokeLinecap="round" />
+                <circle cx={pos_x} cy={pos_y} r={1.5} fill={color} />
+              </g>
+            );
+          })}
         </g>
 
         {/* Car labels (unflipped) */}
         <g>
-          {Object.entries(positions).map(([id, { posX, posY, inbounds }]) => (
+          {Object.entries(positions).map(([id, { pos_x, pos_y }]) => (
             <text
               key={id}
-              x={posX + 2}
-              y={WORLD_MIN_Y + WORLD_MAX_Y - posY}
+              x={pos_x + 2}
+              y={-pos_y + 1}
               fontSize="3"
               fill={colorMap.get(id) ?? '#888'}
-              opacity={inbounds ? 1 : 0.35}
               fontFamily="monospace"
             >
               {id}
@@ -173,12 +188,12 @@ function BirdsEyeView() {
 // ---- App ----
 
 function App() {
-  const [state, dispatch] = useReducer(positionReducer, { system: 'RUNNING', positions: {} });
+  const [state, dispatch] = useReducer(positionReducer, { system: 'RUNNING', positions: {}, grid: null });
   const [connStatus, setConnStatus] = useState<'CONNECTED' | 'DISCONNECTED'>('DISCONNECTED');
   const colorMapRef = useRef<Map<string, string>>(new Map());
 
   useEffect(() => {
-    const ws = DEMO_MODE ? new DemoService() : new WebsocketService(WS_URL);
+    const ws = new WebsocketService(WS_URL);
 
     ws.dispatch = dispatch;
     ws.onconnectionchange = (s) => setConnStatus(s);

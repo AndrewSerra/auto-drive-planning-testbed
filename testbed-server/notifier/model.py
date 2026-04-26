@@ -31,6 +31,10 @@ class ResponseMessage(BaseModel):
     is_success: bool
     message: Optional[str] = None
 
+class GridInfoMessage(BaseModel):
+    num_rows: int
+    num_cols: int
+
 # class CarState(BaseModel):
 #     is_registered: bool = False
 #     is_active: bool = False

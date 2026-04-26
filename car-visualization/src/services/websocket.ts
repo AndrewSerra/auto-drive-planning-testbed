@@ -53,9 +53,15 @@ export class WebsocketService {
     if (typeof parsed !== 'object' || parsed === null) return;
     const msg = parsed as Record<string, unknown>;
     if ('is_success' in msg) return;
+    if ('num_rows' in msg && 'num_cols' in msg) {
+      this.#dispatch({ type: 'SET_GRID', data: msg as unknown as { num_rows: number; num_cols: number } });
+      return;
+    }
+    if ('car_id' in msg) {
+      this.#dispatch({ type: 'NEW_POSITION', data: msg as unknown as PositionData });
+      return;
+    }
     switch (msg.type) {
-      case 'NEW_POSITION':
-        this.#dispatch({ type: 'NEW_POSITION', data: msg.data as PositionData }); break;
       case 'SYSTEM_HALT':
         this.#dispatch({ type: 'SYSTEM_HALT' }); break;
       case 'SYSTEM_RESUME':
