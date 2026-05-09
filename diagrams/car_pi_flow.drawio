@@ -1,0 +1,154 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Car Pi Flow" id="car-pi-flow">
+    <mxGraphModel dx="1826" dy="925" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cp-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Start" vertex="1">
+          <mxGeometry height="60" width="120" x="330" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Load config.json&#xa;(ws_host, ws_port, car_id)" vertex="1">
+          <mxGeometry height="60" width="190" x="295" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e1" edge="1" parent="1" source="cp-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="cp-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Connect to WebSocket&#xa;ws://ws_host:ws_port/" vertex="1">
+          <mxGeometry height="60" width="190" x="295" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e2" edge="1" parent="1" source="cp-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="cp-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Send registration&#xa;{id: car_id, connection_type: &quot;agent&quot;}" vertex="1">
+          <mxGeometry height="60" width="230" x="275" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e3" edge="1" parent="1" source="cp-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="cp-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e3-lbl" connectable="0" parent="cp-e3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="on_open" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Wait for message&#xa;state = CONNECTING" vertex="1">
+          <mxGeometry height="60" width="190" x="295" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e4" edge="1" parent="1" source="cp-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="cp-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-6" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="has &#39;is_success&#39;?" vertex="1">
+          <mxGeometry height="80" width="170" x="305" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e5" edge="1" parent="1" source="cp-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="cp-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-7" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="is_success == true?" vertex="1">
+          <mxGeometry height="80" width="170" x="540" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e6" edge="1" parent="1" source="cp-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cp-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e6-lbl" connectable="0" parent="cp-e6" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="YES" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="state = OPERATING" vertex="1">
+          <mxGeometry height="60" width="140" x="555" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e7" edge="1" parent="1" source="cp-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cp-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e7-lbl" connectable="0" parent="cp-e7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="YES" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="state = ERROR" vertex="1">
+          <mxGeometry height="60" width="120" x="720" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e8" edge="1" parent="1" source="cp-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cp-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e8-lbl" connectable="0" parent="cp-e8" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="NO" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-10" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="state == OPERATING?" vertex="1">
+          <mxGeometry height="80" width="160" x="60" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e9" edge="1" parent="1" source="cp-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="cp-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e9-lbl" connectable="0" parent="cp-e9" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="NO (motor cmd)" vertex="1">
+          <mxGeometry relative="0.5" as="geometry">
+            <mxPoint x="-2" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cp-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="handle_command&#xa;steer(steering)&#xa;forward? drive_forward / drive_stop" vertex="1">
+          <mxGeometry height="70" width="210" x="35" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e10" edge="1" parent="1" source="cp-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cp-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e10-lbl" connectable="0" parent="cp-e10" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="YES" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e11" edge="1" parent="1" source="cp-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cp-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="30" y="805" />
+              <mxPoint x="30" y="540" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cp-e12" edge="1" parent="1" source="cp-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="cp-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="625" y="880" />
+              <mxPoint x="850" y="880" />
+              <mxPoint x="850" y="540" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cp-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="on_error → state=ERROR&#xa;on_close → state=CONNECTING" vertex="1">
+          <mxGeometry height="60" width="190" x="295" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e13" edge="1" parent="1" source="cp-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="cp-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="780" y="930" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cp-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Reconnect delay&#xa;5s if ERROR, else 1s" vertex="1">
+          <mxGeometry height="60" width="190" x="295" y="1020" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e14" edge="1" parent="1" source="cp-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="cp-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e15" edge="1" parent="1" source="cp-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="cp-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="870" y="1050" />
+              <mxPoint x="870" y="300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cp-e15-lbl" connectable="0" parent="cp-e15" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="reconnect" vertex="1">
+          <mxGeometry relative="0.5" as="geometry">
+            <mxPoint x="-200" y="375" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cp-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ignore" vertex="1">
+          <mxGeometry height="60" width="120" x="90" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="cp-e16" edge="1" parent="1" source="cp-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cp-14">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="10" y="670" />
+              <mxPoint x="10" y="860" />
+              <mxPoint x="150" y="860" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cp-e16-lbl" connectable="0" parent="cp-e16" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="NO" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

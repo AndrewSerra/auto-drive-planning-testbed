@@ -1,0 +1,154 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Car Visualization Flow" id="car-viz-flow">
+    <mxGraphModel dx="2120" dy="643" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cv-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="App mounts" vertex="1">
+          <mxGeometry height="60" width="160" x="330" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="WebsocketService created&#xa;(generates UUID client id)" vertex="1">
+          <mxGeometry height="60" width="230" x="295" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e1" edge="1" parent="1" source="cv-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="cv-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Connect to WebSocket&#xa;(VITE_WS_URL, default ws://localhost:8765)" vertex="1">
+          <mxGeometry height="60" width="270" x="275" y="275" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e2" edge="1" parent="1" source="cv-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="cv-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Send INITIALIZE registration&#xa;{action: INITIALIZE, id: UUID,&#xa;connection_type: &quot;display&quot;}" vertex="1">
+          <mxGeometry height="70" width="270" x="275" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e3" edge="1" parent="1" source="cv-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="cv-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e3-lbl" connectable="0" parent="cv-e3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="on connect" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Wait for messages" vertex="1">
+          <mxGeometry height="60" width="160" x="330" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e4" edge="1" parent="1" source="cv-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="cv-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-6" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="message type?" vertex="1">
+          <mxGeometry height="80" width="170" x="325" y="645" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e5" edge="1" parent="1" source="cv-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="cv-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ignore" vertex="1">
+          <mxGeometry height="60" width="120" x="175" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e6" edge="1" parent="1" source="cv-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cv-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e6-lbl" connectable="0" parent="cv-e6" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="has &#39;is_success&#39;" vertex="1">
+          <mxGeometry relative="0.5" as="geometry">
+            <mxPoint x="-50" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cv-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="dispatch SET_GRID&#xa;BirdsEyeView renders grid" vertex="1">
+          <mxGeometry height="60" width="190" x="295" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e7" edge="1" parent="1" source="cv-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cv-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e7-lbl" connectable="0" parent="cv-e7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="has num_rows + num_cols" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="dispatch NEW_POSITION&#xa;BirdsEyeView renders car + arrow" vertex="1">
+          <mxGeometry height="60" width="200" x="530" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e8" edge="1" parent="1" source="cv-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cv-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e8-lbl" connectable="0" parent="cv-e8" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="has &#39;car_id&#39;" vertex="1">
+          <mxGeometry relative="0.5" as="geometry">
+            <mxPoint x="10" y="55" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cv-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="dispatch SYSTEM_HALT or&#xa;SYSTEM_RESUME&#xa;Sidebar shows HALTED/RUNNING" vertex="1">
+          <mxGeometry height="70" width="200" x="530" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e9" edge="1" parent="1" source="cv-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="cv-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="780" y="685" />
+              <mxPoint x="780" y="955" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cv-e9-lbl" connectable="0" parent="cv-e9" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="type == SYSTEM_HALT/RESUME" vertex="1">
+          <mxGeometry relative="0.5" as="geometry">
+            <mxPoint x="-50" y="-18" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cv-e10" edge="1" parent="1" source="cv-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cv-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="110" y="830" />
+              <mxPoint x="110" y="555" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cv-e11" edge="1" parent="1" source="cv-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cv-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="630" y="880" />
+              <mxPoint x="110" y="880" />
+              <mxPoint x="110" y="555" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cv-e11b" edge="1" parent="1" source="cv-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="cv-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="970" />
+              <mxPoint x="830" y="970" />
+              <mxPoint x="830" y="555" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cv-e12" edge="1" parent="1" source="cv-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cv-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="150" y="740" />
+              <mxPoint x="150" y="555" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cv-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="on disconnect&#xa;auto-reconnect in 2000ms" vertex="1">
+          <mxGeometry height="60" width="230" x="295" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="cv-e13" edge="1" parent="1" source="cv-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cv-11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="80" y="540" />
+              <mxPoint x="80" y="1040" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cv-e13-lbl" connectable="0" parent="cv-e13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="on disconnect" vertex="1">
+          <mxGeometry relative="0.5" as="geometry">
+            <mxPoint x="-50" y="65" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cv-e14" edge="1" parent="1" source="cv-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="cv-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="880" y="1040" />
+              <mxPoint x="880" y="305" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cv-e14-lbl" connectable="0" parent="cv-e14" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="reconnect" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

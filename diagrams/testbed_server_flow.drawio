@@ -1,0 +1,295 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Testbed Server Flow" id="testbed-server-flow">
+    <mxGraphModel dx="1328" dy="673" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ts-h1" parent="1" style="text;html=1;strokeColor=none;fillColor=#dae8fc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=12;" value="Camera Thread (AgentTracker)" vertex="1">
+          <mxGeometry height="40" width="270" x="30" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-h2" parent="1" style="text;html=1;strokeColor=none;fillColor=#d5e8d4;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=12;" value="Controller Thread" vertex="1">
+          <mxGeometry height="40" width="240" x="390" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-h3" parent="1" style="text;html=1;strokeColor=none;fillColor=#fff2cc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=12;" value="NotifierServer Thread (WebSocket :8765)" vertex="1">
+          <mxGeometry height="40" width="330" x="710" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-main" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="main.py: load config, calibrate camera,&#xa;create queues, start all threads" vertex="1">
+          <mxGeometry height="50" width="390" x="315" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-c1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Calibrate camera&#xa;compute homography H&#xa;from 4 corner April Tags" vertex="1">
+          <mxGeometry height="70" width="230" x="50" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce0" edge="1" parent="1" source="ts-main" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-c1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-c2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Capture video frame" vertex="1">
+          <mxGeometry height="60" width="230" x="50" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce1" edge="1" parent="1" source="ts-c1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-c2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-c3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Detect April Tags&#xa;(DICT_APRILTAG_16h5)" vertex="1">
+          <mxGeometry height="60" width="230" x="50" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce2" edge="1" parent="1" source="ts-c2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-c3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-c4" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="tag detected?" vertex="1">
+          <mxGeometry height="70" width="190" x="70" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce3" edge="1" parent="1" source="ts-c3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-c4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce3b" edge="1" parent="1" source="ts-c4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="ts-c2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="20" y="585" />
+              <mxPoint x="20" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ts-ce3b-lbl" connectable="0" parent="ts-ce3b" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="NO" vertex="1">
+          <mxGeometry relative="0.5" as="geometry">
+            <mxPoint x="10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ts-c5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Transform corners to BEV&#xa;via homography H" vertex="1">
+          <mxGeometry height="60" width="230" x="50" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce4" edge="1" parent="1" source="ts-c4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-c5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce4-lbl" connectable="0" parent="ts-ce4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="YES" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-c6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Map to grid cell (row, col)&#xa;Compute heading angle" vertex="1">
+          <mxGeometry height="60" width="230" x="50" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce5" edge="1" parent="1" source="ts-c5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-c6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-c7" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="position changed&#xa;significantly (&gt;1px)?" vertex="1">
+          <mxGeometry height="80" width="210" x="60" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce6" edge="1" parent="1" source="ts-c6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-c7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce6b" edge="1" parent="1" source="ts-c7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="ts-c2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="20" y="960" />
+              <mxPoint x="20" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ts-ce6b-lbl" connectable="0" parent="ts-ce6b" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="NO" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-c8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Put DetectedChange → detection_q&#xa;{car_id, pos_x, pos_y, grid_row,&#xa;grid_col, angle}" vertex="1">
+          <mxGeometry height="70" width="250" x="40" y="1060" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce7" edge="1" parent="1" source="ts-c7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-c8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce7-lbl" connectable="0" parent="ts-ce7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="YES" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ce8" edge="1" parent="1" source="ts-c8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="ts-c2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="165" y="1170" />
+              <mxPoint x="330" y="1170" />
+              <mxPoint x="330" y="400" />
+              <mxPoint x="165" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ts-k1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Poll detection_q&#xa;(blocking)" vertex="1">
+          <mxGeometry height="60" width="220" x="400" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ke0" edge="1" parent="1" source="ts-main" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-k1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-k2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Forward DetectedChange → notifier_q&#xa;(for display clients)" vertex="1">
+          <mxGeometry height="60" width="240" x="390" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ke1" edge="1" parent="1" source="ts-k1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-k2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-k3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Update FieldState&#xa;(row, col, angle)" vertex="1">
+          <mxGeometry height="60" width="220" x="400" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ke2" edge="1" parent="1" source="ts-k2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-k3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-k4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Run SIPP planning&#xa;(other agents&#39; plans as&#xa;dynamic obstacles)" vertex="1">
+          <mxGeometry height="70" width="220" x="400" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ke3" edge="1" parent="1" source="ts-k3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-k4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-k5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Cache plan for this agent" vertex="1">
+          <mxGeometry height="60" width="220" x="400" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ke4" edge="1" parent="1" source="ts-k4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-k5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-k6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Compute target heading&#xa;atan2(-dr, dc) → heading_error&#xa;steering = clamp(error/90, ±1)" vertex="1">
+          <mxGeometry height="70" width="240" x="390" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ke5" edge="1" parent="1" source="ts-k5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-k6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-k7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Put CarCommandMessage → notifier_q&#xa;{car_id, forward: true, steering}" vertex="1">
+          <mxGeometry height="60" width="240" x="390" y="930" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ke6" edge="1" parent="1" source="ts-k6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-k7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ke7" edge="1" parent="1" source="ts-k7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="ts-k1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="670" y="960" />
+              <mxPoint x="670" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ts-n1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Listen on 0.0.0.0:8765" vertex="1">
+          <mxGeometry height="60" width="270" x="730" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne0" edge="1" parent="1" source="ts-main" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-n1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-n2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Accept WebSocket connection" vertex="1">
+          <mxGeometry height="60" width="270" x="730" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne1" edge="1" parent="1" source="ts-n1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-n2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-n3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Wait for registration message" vertex="1">
+          <mxGeometry height="60" width="270" x="730" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne2" edge="1" parent="1" source="ts-n2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-n3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-n4" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="valid and unique ID?" vertex="1">
+          <mxGeometry height="70" width="240" x="745" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne3" edge="1" parent="1" source="ts-n3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-n4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-n5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Send failure ResponseMessage&#xa;End connection" vertex="1">
+          <mxGeometry height="64" width="200" x="1040" y="553" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne3b" edge="1" parent="1" source="ts-n4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="ts-n5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne3b-lbl" connectable="0" parent="ts-ne3b" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="NO" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-n6" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="connection_type?" vertex="1">
+          <mxGeometry height="70" width="240" x="745" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne4" edge="1" parent="1" source="ts-n4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-n6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne4-lbl" connectable="0" parent="ts-ne4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="YES" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-n7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Subscribe to&#xa;RECV_COMMAND + SYSTEM_WIDE" vertex="1">
+          <mxGeometry height="60" width="200" x="680" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne5" edge="1" parent="1" source="ts-n6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ts-n7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne5-lbl" connectable="0" parent="ts-ne5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="agent" vertex="1">
+          <mxGeometry relative="0.5" as="geometry">
+            <mxPoint x="5" y="-25" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ts-n8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Subscribe to&#xa;RECV_POSITION + SYSTEM_WIDE" vertex="1">
+          <mxGeometry height="60" width="200" x="900" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne6" edge="1" parent="1" source="ts-n6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ts-n8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne6-lbl" connectable="0" parent="ts-ne6" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="display" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-n9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Send ResponseMessage(is_success=true)&#xa;Send GridInfoMessage(num_rows, num_cols)" vertex="1">
+          <mxGeometry height="60" width="300" x="720" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne7" edge="1" parent="1" source="ts-n7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="ts-n9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne8" edge="1" parent="1" source="ts-n8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="ts-n9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-n10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Wait for messages (notifier_q)" vertex="1">
+          <mxGeometry height="60" width="270" x="735" y="1080" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne9" edge="1" parent="1" source="ts-n9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-n10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-n11" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="message type?" vertex="1">
+          <mxGeometry height="70" width="250" x="745" y="1200" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne10" edge="1" parent="1" source="ts-n10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ts-n11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-n12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Broadcast to all&#xa;RECV_POSITION subscribers" vertex="1">
+          <mxGeometry height="60" width="200" x="620" y="1340" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne11" edge="1" parent="1" source="ts-n11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ts-n12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne11-lbl" connectable="0" parent="ts-ne11" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="DetectedChange" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-n13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Send to specific car&#xa;via car_id websocket" vertex="1">
+          <mxGeometry height="60" width="200" x="920" y="1340" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne12" edge="1" parent="1" source="ts-n11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ts-n13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne12-lbl" connectable="0" parent="ts-ne12" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="CarCommandMessage" vertex="1">
+          <mxGeometry relative="0.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ts-ne13" edge="1" parent="1" source="ts-n12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" target="ts-n10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="1420" />
+              <mxPoint x="600" y="1420" />
+              <mxPoint x="600" y="1125" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ts-ne14" edge="1" parent="1" source="ts-n13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="ts-n10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1000" y="1420" />
+              <mxPoint x="1140" y="1420" />
+              <mxPoint x="1140" y="1110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ts-cross1" edge="1" parent="1" source="ts-c8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#6c8ebf;fontColor=#6c8ebf;dashed=1;" target="ts-k1" value="detection_q: DetectedChange">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="350" y="1095" />
+              <mxPoint x="350" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ts-cross2" edge="1" parent="1" source="ts-k7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;fontColor=#82b366;dashed=1;" target="ts-n10" value="notifier_q">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="680" y="975" />
+              <mxPoint x="680" y="1110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
