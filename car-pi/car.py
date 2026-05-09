@@ -5,7 +5,10 @@ import time
 from pathlib import Path
 
 import websocket
-from gpiozero import Servo
+from gpiozero import Device, Servo
+from gpiozero.pins.lgpio import LGPIOFactory
+
+Device.pin_factory = LGPIOFactory()
 
 STEERING_PIN = 18
 ESC_PIN = 19
@@ -35,7 +38,6 @@ state = CONNECTING
 
 def drive_stop():
     esc.value = ESC_NEUTRAL
-    steering_servo.mid()
 
 
 def drive_forward():
@@ -108,6 +110,12 @@ signal.signal(signal.SIGTERM, _shutdown)
 
 drive_stop()
 print("[Boot] Car system starting.")
+print("[Boot] Steering self-test: left → right → center")
+steer(-1.0)
+time.sleep(0.5)
+steer(1.0)
+time.sleep(0.5)
+steer(0.0)
 
 while True:
     state = CONNECTING

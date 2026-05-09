@@ -176,18 +176,19 @@ class AgentTracker:
                 #     break
                 continue
 
-            # Remove wrapper dimension - OpenCV python adds another dimention to the result
-            corners_unwrap, ids_unwrap = corners[0], ids[0]
-            centers = [self._get_april_tag_center(tag) for tag in corners_unwrap]
+            img_w = float(self._grid_space[0][-1])
+            img_h = float(self._grid_space[1][-1])
 
-            for i in range(len(ids_unwrap)):
-                car_id = ids_unwrap[i]
-                # Project the centers to bird's eye view
-                p = self._H @ centers[i]
+            # corners is list of N arrays (1,4,2); ids is (N,1)
+            for tag_corners_arr, tag_id in zip(corners, ids.flatten()):
+                car_id = str(tag_id)
+                tag = tag_corners_arr[0]  # (4, 2)
 
+                center = self._get_april_tag_center(tag)
+                p = self._H @ center
                 pos_img = (p[0] / p[2], p[1] / p[2])
                 pos_grid = _get_agent_grid_pos(self._grid_space, pos_img)
-                corners_bev = self._transform_corners_to_bev(corners_unwrap[i])
+                corners_bev = self._transform_corners_to_bev(tag)
                 tag_angle = self._get_tag_angle_bev(corners_bev)
 
                 self._update_motion_tracker(
@@ -200,14 +201,13 @@ class AgentTracker:
 
                 if self._motion_vec_lookup[car_id].has_significant_change:
                     _logger.info(f"Detected significant movement in car {car_id}.")
-                    pos_tracker_car = self._motion_vec_lookup[car_id]
-                    x, y = pos_tracker_car.position
+                    x_px, y_px = self._motion_vec_lookup[car_id].position
 
                     self._output_queue.put(
                         DetectedChange(
-                            car_id=str(car_id),
-                            pos_x=x,
-                            pos_y=y,
+                            car_id=car_id,
+                            pos_x=(x_px / img_w) * 100.0 - 50.0,
+                            pos_y=(y_px / img_h) * 100.0 - 50.0,
                             grid_row=pos_grid[0],
                             grid_col=pos_grid[1],
                             angle=tag_angle,
